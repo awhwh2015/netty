@@ -673,6 +673,20 @@ public abstract class AbstractByteBuf extends ByteBuf {
     }
 
     private int setCharSequence0(int index, CharSequence sequence, Charset charset, boolean expand) {
+        int written = setCharSequenceOptimized(index, sequence, charset, expand);
+        if (written >= 0) {
+            return written;
+        }
+        byte[] bytes = sequence.toString().getBytes(charset);
+        if (expand) {
+            ensureWritable0(bytes.length);
+            // setBytes(...) will take care of checking the indices.
+        }
+        setBytes(index, bytes);
+        return bytes.length;
+    }
+
+    int setCharSequenceOptimized(int index, CharSequence sequence, Charset charset, boolean expand) {
         if (charset.equals(CharsetUtil.UTF_8)) {
             int length = ByteBufUtil.utf8MaxBytes(sequence);
             if (expand) {
@@ -693,13 +707,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
             }
             return ByteBufUtil.writeAscii(this, index, sequence, length);
         }
-        byte[] bytes = sequence.toString().getBytes(charset);
-        if (expand) {
-            ensureWritable0(bytes.length);
-            // setBytes(...) will take care of checking the indices.
-        }
-        setBytes(index, bytes);
-        return bytes.length;
+        return -1;
     }
 
     @Override

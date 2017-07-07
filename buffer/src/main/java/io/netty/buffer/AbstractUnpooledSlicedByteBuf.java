@@ -387,11 +387,6 @@ abstract class AbstractUnpooledSlicedByteBuf extends AbstractDerivedByteBuf {
     }
 
     @Override
-    public int setCharSequence(int index, CharSequence sequence, Charset charset) {
-        return super.setCharSequence(idx(index), sequence, charset);
-    }
-
-    @Override
     public ByteBuf getBytes(int index, OutputStream out, int length) throws IOException {
         checkIndex0(index, length);
         unwrap().getBytes(idx(index), out, length);
@@ -465,6 +460,12 @@ abstract class AbstractUnpooledSlicedByteBuf extends AbstractDerivedByteBuf {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    int setCharSequenceOptimized(int index, CharSequence sequence, Charset charset, boolean expand) {
+        // Adjust the index.
+        return super.setCharSequenceOptimized(idx(index), sequence, charset, expand);
     }
 
     /**

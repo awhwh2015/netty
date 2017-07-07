@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
+import java.nio.charset.Charset;
 
 import static io.netty.buffer.AbstractUnpooledSlicedByteBuf.checkSliceOutOfBounds;
 
@@ -431,6 +432,12 @@ final class PooledSlicedByteBuf extends AbstractPooledDerivedByteBuf {
             return -1;
         }
         return ret - adjustment;
+    }
+
+    @Override
+    int setCharSequenceOptimized(int index, CharSequence sequence, Charset charset, boolean expand) {
+        // Adjust the index.
+        return super.setCharSequenceOptimized(idx(index), sequence, charset, expand);
     }
 
     private int idx(int index) {
